@@ -1,0 +1,61 @@
+# docker-compose.yml
+# Run everything with: docker-compose up --build
+
+version: '3.8'
+
+services:
+  # --- Service 1: PostgreSQL database ---
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-finance_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-finance_password}
+      POSTGRES_DB: ${POSTGRES_DB:-finance_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finance_user -d finance_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- Service 2: Redis cache ---
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # --- Service 3: Our FastAPI backend  ---
+  backend:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      # OVERRIDE the .env file here to force Docker networking names instead of localhost
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-finance_user}:${POSTGRES_PASSWORD:-finance_password}@postgres:5432/${POSTGRES_DB:-finance_db}
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy # Waits for the DB to be fully ready before booting backend
+      redis:
+        condition: service_started
+    restart: on-failure # Restarts the backend automatically if it crashes
+
+  # --- Service 4: Nginx serves the frontend HTML files ---
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./scripts/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+
+# Named volume so Postgres data survives container restarts
+volumes:
+  postgres_data:
