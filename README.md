@@ -11,8 +11,8 @@ Trax.ai is an AI-powered stock research platform designed to simplify investment
 - 🎯 Investment Recommendations - Generates structured BUY, HOLD, or SELL recommendations with supporting rationale, risks, and opportunities.
 - 🔒 Portfolio & Report Management - Enables users to save analyses, track portfolios, and access previous research reports through a secure authenticated dashboard.
 
-### Overview of the architecture
-<p>
+<p align="center">
+    <h3>Overview of architecture</h3>
   <img src="images/overview.png" alt="Overview Diagram" width="400"/>
 </p>
 
