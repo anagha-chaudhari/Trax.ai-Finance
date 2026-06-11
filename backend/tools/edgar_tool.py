@@ -51,8 +51,8 @@ def find_first_available(facts, concepts):
             return value, concept
     return None, None
 
+# CrewAI base tool format
 
-# ── CrewAI BaseTool format ────────────────────────────────
 class SECInput(BaseModel):
     ticker: str = Field(description="Stock ticker symbol e.g. AAPL")
 
@@ -82,9 +82,9 @@ class FetchSECFinancialsTool(BaseTool):
             company_name = facts.get("entityName", ticker)
 
             revenue, revenue_concept = find_first_available(facts, REVENUE_CONCEPTS)
-            net_income, _            = find_first_available(facts, NET_INCOME_CONCEPTS)
-            total_assets, _          = find_first_available(facts, ["Assets"])
-            total_liabilities, _     = find_first_available(facts, ["Liabilities"])
+            net_income, _ = find_first_available(facts, NET_INCOME_CONCEPTS)
+            total_assets, _ = find_first_available(facts, ["Assets"])
+            total_liabilities, _ = find_first_available(facts, ["Liabilities"])
 
             def fmt(val):
                 if val is None: return "N/A"
@@ -99,19 +99,18 @@ class FetchSECFinancialsTool(BaseTool):
                 debt_ratio = f"{(total_liabilities/total_assets):.2f}"
 
             return f"""
-SEC EDGAR 10-K Filing — {company_name} ({ticker.upper()})
-Revenue:           {fmt(revenue)}
-Net Income:        {fmt(net_income)}
-Total Assets:      {fmt(total_assets)}
-Total Liabilities: {fmt(total_liabilities)}
-Profit Margin:     {profit_margin}
-Debt Ratio:        {debt_ratio}
-Revenue Field:     {revenue_concept or 'N/A'}
-            """.strip()
+            SEC EDGAR 10-K Filing — {company_name} ({ticker.upper()})
+            Revenue: {fmt(revenue)}
+            Net Income: {fmt(net_income)}
+            Total Assets: {fmt(total_assets)}
+            Total Liabilities: {fmt(total_liabilities)}
+            Profit Margin: {profit_margin}
+            Debt Ratio:{debt_ratio}
+            Revenue Field:{revenue_concept or 'N/A'}
+                        """.strip()
 
         except Exception as e:
             return f"Error fetching SEC data for {ticker}: {str(e)}"
 
 
-# Single instance — imported by crew.py
 fetch_sec_financials = FetchSECFinancialsTool()

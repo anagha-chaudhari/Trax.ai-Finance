@@ -116,9 +116,5 @@ def get_my_profile(
     # Current user is obtained from JWT token
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Returns profile information
-    of the currently logged-in user.
-    """
     return current_user
 

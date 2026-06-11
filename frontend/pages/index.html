@@ -1,466 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRAX-AI — Financial Intelligence Terminal</title>
-  <link rel="stylesheet" href="../static/css/style.css">
-  <!-- Chart.js via CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAX-AI | Institutional Report</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════
-     AUTH VIEW
-══════════════════════════════════════════════════════ -->
-<div id="auth-view">
-  <div class="auth-container">
+    <div id="auth-view" class="view-container">
+        <div class="auth-card">
+            <div class="header-gold">
+                <h2>TRAX-AI // SECURE ACCESS</h2>
+            </div>
+            <div class="card-body">
+                <p id="auth-subtitle">Institutional login required.</p>
+                
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="auth-email" placeholder="name@institution.com">
+                </div>
 
-    <div class="auth-logo">
-      <div class="auth-logo-mark">T</div>
-      <div class="auth-logo-text">TRAX-AI</div>
+                <div class="input-group hidden" id="username-group">
+                    <label>Username</label>
+                    <input type="text" id="auth-username" placeholder="Required for registration">
+                </div>
+
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="auth-password" placeholder="••••••••">
+                </div>
+                
+                <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Authenticate</button>
+                <p id="auth-error" class="error-text hidden">Error message</p>
+
+                <p class="auth-toggle">
+                    <span id="toggle-text">New terminal user?</span> 
+                    <a href="#" onclick="toggleAuthMode()">Request Access</a>
+                </p>
+            </div>
+        </div>
     </div>
 
-    <div class="card">
-      <div class="auth-tabs">
-        <button class="auth-tab active" data-tab="login">Sign in</button>
-        <button class="auth-tab" data-tab="register">Create account</button>
-      </div>
+    <div id="dashboard-view" class="view-container hidden">
+        
+        <header class="top-bar">
+            <div class="brand">TRAX-AI <span>PORTFOLIO SUMMARY REPORT</span></div>
+            <div class="nav-controls">
+                <div class="search-box">
+                    <input list="popular-tickers" id="ticker-input" placeholder="Select or type ticker (e.g. AAPL)">
+                    <datalist id="popular-tickers">
+                        <option value="AAPL">Apple Inc.</option>
+                        <option value="MSFT">Microsoft Corp.</option>
+                        <option value="NVDA">Nvidia</option>
+                        <option value="TSLA">Tesla</option>
+                        <option value="GOOGL">Alphabet</option>
+                    </datalist>
+                    <button id="analyze-btn" onclick="startAnalysis()">Generate Report</button>
+                </div>
+                <button class="btn-secondary" onclick="handleLogout()">Logout</button>
+            </div>
+        </header>
 
-      <!-- Login -->
-      <form id="login-form" class="auth-form">
-        <div class="form-group">
-          <label>Email</label>
-          <input id="login-email" type="email" placeholder="analyst@firm.com" required>
+        <div id="loading-state" class="hidden status-banner">
+            <div class="spinner"></div>
+            <div class="status-text">
+                <h4 id="status-headline">Compiling Institutional Data...</h4>
+                <p id="status-subtext">Connecting to agent orchestration.</p>
+            </div>
         </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input id="login-password" type="password" placeholder="••••••••" required>
-        </div>
-        <div id="auth-error" class="auth-error"></div>
-        <button type="submit" class="btn-primary">Sign in</button>
-      </form>
 
-      <!-- Register -->
-      <form id="register-form" class="auth-form hidden">
-        <div class="form-group">
-          <label>Email</label>
-          <input id="reg-email" type="email" placeholder="analyst@firm.com" required>
-        </div>
-        <div class="form-group">
-          <label>Username</label>
-          <input id="reg-username" type="text" placeholder="analyst" required minlength="3">
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input id="reg-password" type="password" placeholder="Min. 8 characters" required minlength="8">
-        </div>
-        <button type="submit" class="btn-primary">Create account</button>
-      </form>
+        <main id="dashboard-content" class="hidden">
+            
+            <section class="report-section">
+                <div class="header-gold hero-header">
+                    <h1 id="ticker-display">--</h1>
+                    <h3 id="company-display">--</h3>
+                </div>
+                <div class="grid-3">
+                    <div class="stat-box">
+                        <span class="label">System Recommendation</span>
+                        <span id="recommendation-display" class="value">--</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">Risk Profile</span>
+                        <span id="risk-display" class="value">--</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">Market Sentiment</span>
+                        <span id="sentiment-display" class="value">--</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="agent-grid">
+                
+                <div class="agent-card">
+                    <div class="header-green agent-header">
+                        <h4>SEC Forensic Accountant</h4>
+                        <button class="btn-workflow" onclick="toggleWorkflow('wf-1')">View Workflow</button>
+                    </div>
+                    <div id="wf-1" class="workflow-box hidden">
+                        <strong>Under the Hood:</strong> 1. Queries SEC EDGAR API → 2. Parses latest 10-K XML → 3. Extracts Revenue/Income → 4. Computes leverage metrics.
+                    </div>
+                    <div class="agent-body">
+                        <p id="sec-analysis-display" class="agent-text">--</p>
+                        <div class="data-table">
+                            <div class="table-row"><span class="table-label">Revenue</span><strong id="revenue-display">--</strong></div>
+                            <div class="table-row"><span class="table-label">Net Income</span><strong id="net-income-display">--</strong></div>
+                            <div class="table-row"><span class="table-label">Total Assets</span><strong id="assets-display">--</strong></div>
+                            <div class="table-row"><span class="table-label">Profit Margin</span><strong id="margin-display">--</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="header-gold agent-header">
+                        <h4>Quantitative Market Analyst</h4>
+                        <button class="btn-workflow" onclick="toggleWorkflow('wf-2')">View Workflow</button>
+                    </div>
+                    <div id="wf-2" class="workflow-box hidden">
+                        <strong>Under the Hood:</strong> 1. Fetches Yahoo Finance Live Data → 2. Calculates 50/200 Day MAs → 3. Evaluates P/E & Beta → 4. Determines crossover trend.
+                    </div>
+                    <div class="agent-body">
+                        <p id="market-analysis-display" class="agent-text">--</p>
+                        <div class="data-table">
+                            <div class="table-row"><span class="table-label">Market Cap</span><strong id="market-cap-display">--</strong></div>
+                            <div class="table-row"><span class="table-label">Trend</span><strong id="trend-display">--</strong></div>
+                            <div class="table-row"><span class="table-label">Beta</span><strong id="beta-display">--</strong></div>
+                            <div class="table-row"><span class="table-label">ROE</span><strong id="roe-display">--</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="header-green agent-header">
+                        <h4>Portfolio Risk Evaluator</h4>
+                        <button class="btn-workflow" onclick="toggleWorkflow('wf-3')">View Workflow</button>
+                    </div>
+                    <div id="wf-3" class="workflow-box hidden">
+                        <strong>Under the Hood:</strong> 1. Aggregates SEC & Market Data → 2. Scores Volatility & Leverage → 3. Compares to S&P 500 Baseline → 4. Assigns Standardized Rating.
+                    </div>
+                    <div class="agent-body">
+                        <p id="risk-analysis-display" class="agent-text">--</p>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="header-gold agent-header">
+                        <h4>News & Catalyst Analyst</h4>
+                        <button class="btn-workflow" onclick="toggleWorkflow('wf-4')">View Workflow</button>
+                    </div>
+                    <div id="wf-4" class="workflow-box hidden">
+                        <strong>Under the Hood:</strong> 1. Scrapes Top Financial Headlines → 2. Runs FinBERT NLP Model → 3. Weighs Positive/Negative phrasing → 4. Outputs Confidence Score.
+                    </div>
+                    <div class="agent-body">
+                        <p id="news-analysis-display" class="agent-text">--</p>
+                    </div>
+                </div>
+
+            </section>
+
+          <section class="report-section final-thesis">
+                <div class="header-green hero-header">
+                    <h2>EXECUTIVE INVESTMENT THESIS</h2>
+                </div>
+                <div class="agent-body">
+                    
+                    <div class="thesis-statement">
+                        <div class="drop-cap" id="summary-dropcap">T</div>
+                        <p id="summary-display" class="synthesis-text">he system is awaiting pipeline execution to generate the institutional thesis.</p>
+                    </div>
+                    
+                    <div class="thesis-grid">
+                        <div class="thesis-box bear-case">
+                            <h5>Bear Case // Material Risks</h5>
+                            <div class="box-content">
+                                <ul id="risks-list" class="action-list"></ul>
+                            </div>
+                        </div>
+                        <div class="thesis-box bull-case">
+                            <h5>Bull Case // Structural Catalysts</h5>
+                            <div class="box-content">
+                                <ul id="opportunities-list" class="action-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="final-verdict">
+                        <span class="verdict-label">Systematic Action Required:</span>
+                        <strong id="verdict-display">AWAITING TARGET DATA</strong>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
     </div>
 
-    <p style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted)">
-      Enterprise Financial Intelligence Platform · v1.0
-    </p>
-  </div>
-</div>
-
-
-<!-- ══════════════════════════════════════════════════════
-     APP SHELL (Workspace + Dashboard)
-══════════════════════════════════════════════════════ -->
-<div id="app-shell" class="hidden">
-
-  <!-- TOP NAV -->
-  <nav id="top-nav">
-    <div class="nav-logo">
-      <div class="nav-logo-mark">T</div>
-      <span class="nav-logo-text">TRAX-AI</span>
-    </div>
-
-    <div class="nav-search">
-      <span class="nav-search-icon">⌕</span>
-      <input id="nav-search-input" type="text"
-             placeholder="Analyze a ticker (e.g. AAPL)"
-             style="text-transform:uppercase">
-    </div>
-
-    <div class="nav-right">
-      <span style="font-size:11px;color:var(--muted)" id="nav-username"></span>
-      <button class="nav-btn" id="logout-btn">Sign out</button>
-    </div>
-  </nav>
-
-  <div class="app-body">
-
-    <!-- SIDEBAR -->
-    <aside id="sidebar">
-      <button class="sidebar-btn active" data-view="analyze" title="Analyze">
-        ◈
-      </button>
-      <button class="sidebar-btn" data-view="portfolio" title="Portfolio">
-        ⊞
-      </button>
-      <button class="sidebar-btn" data-view="history" title="History">
-        ⊙
-      </button>
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <main id="main-content">
-
-      <!-- ── WORKSPACE VIEW ────────────────────────────── -->
-      <div id="workspace-view">
-        <div class="workspace-hero">
-          <h1>What should you invest in today?</h1>
-          <p>Enter any US stock ticker. Four AI agents will research it in under 60 seconds.</p>
-        </div>
-
-        <div class="search-bar-large">
-          <span class="search-icon-large">⌕</span>
-          <input id="workspace-search" type="text"
-                 placeholder="Enter ticker symbol — AAPL, MSFT, GOOGL..."
-                 maxlength="10">
-          <button class="search-btn" id="search-submit-btn">Analyze →</button>
-        </div>
-
-        <!-- Progress stepper — hidden until analysis starts -->
-        <div id="progress-card" class="card hidden" style="width:100%;max-width:520px">
-          <div class="stepper-title">
-            <div class="pulse"></div>
-            <span>Analyzing <span id="stepper-ticker" class="mono" style="color:var(--violet)"></span></span>
-            <span class="muted" style="margin-left:auto;font-size:11px">~60s</span>
-          </div>
-
-          <div class="step-row" id="step-sec">
-            <div class="step-icon">○</div>
-            <div class="step-text">Querying SEC EDGAR Core Data...</div>
-            <div class="step-time"></div>
-          </div>
-          <div class="step-row" id="step-market">
-            <div class="step-icon">○</div>
-            <div class="step-text">Running Quantitative Technical Indicators...</div>
-            <div class="step-time"></div>
-          </div>
-          <div class="step-row" id="step-finbert">
-            <div class="step-icon">○</div>
-            <div class="step-text">Executing FinBERT News Sentiment Vectoring...</div>
-            <div class="step-time"></div>
-          </div>
-          <div class="step-row" id="step-synth">
-            <div class="step-icon">○</div>
-            <div class="step-text">Synthesizing Final Portfolio Recommendation...</div>
-            <div class="step-time"></div>
-          </div>
-        </div>
-
-        <!-- Capability chips -->
-        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:32px;max-width:520px">
-          <span class="chip"><span class="dot"></span>SEC EDGAR</span>
-          <span class="chip"><span class="dot"></span>yfinance</span>
-          <span class="chip"><span class="dot"></span>FinBERT NLP</span>
-          <span class="chip"><span class="dot"></span>CrewAI Agents</span>
-          <span class="chip"><span class="dot"></span>Gemini 1.5 Flash</span>
-        </div>
-      </div>
-
-
-      <!-- ── DASHBOARD VIEW ─────────────────────────────── -->
-      <div id="dashboard-view" class="hidden">
-
-        <!-- HERO ROW: price chart + recommendation -->
-        <div class="hero-grid">
-
-          <!-- Left: ticker info + badges -->
-          <div class="card hero-ticker">
-            <div class="card-label">Live Analysis</div>
-            <div class="hero-company" id="d-company">—</div>
-            <div class="hero-ticker-symbol mono" id="d-ticker">—</div>
-            <div class="hero-price mono" id="d-price">—</div>
-            <div class="hero-change" id="d-price-change"></div>
-
-            <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:11px;color:var(--muted)">Recommendation</span>
-                <span id="d-recommendation" class="badge badge-hold">HOLD</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:11px;color:var(--muted)">Risk level</span>
-                <span id="d-risk" class="badge badge-medium">MEDIUM RISK</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:11px;color:var(--muted)">Sentiment</span>
-                <span id="d-sentiment-badge" class="muted" style="font-family:var(--mono);font-size:12px">NEUTRAL</span>
-              </div>
-            </div>
-
-            <!-- Quick metrics -->
-            <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
-              <div class="metric-row">
-                <span class="metric-label">Market cap</span>
-                <span class="metric-value" id="d-marketcap">—</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Beta</span>
-                <span class="metric-value" id="d-beta">—</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">ROE</span>
-                <span class="metric-value" id="d-roe">—</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Trend</span>
-                <span class="metric-value mono" id="d-trend" style="font-size:11px">—</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: 1-year price chart -->
-          <div class="card chart-card-hero">
-            <div class="card-label">1-Year Price History</div>
-            <div style="height:220px">
-              <canvas id="chart-price"></canvas>
-            </div>
-          </div>
-        </div>
-
-
-        <!-- AGENT GRID: 4 agent cards -->
-        <div class="agent-grid">
-
-          <!-- ── AGENT 1: SEC Forensic ──────────────────── -->
-          <div class="card">
-            <div class="card-label">SEC Forensic Accountant · Agent 1</div>
-            <p id="d-sec-text" style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6"></p>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-              <div style="background:var(--surface2);border-radius:6px;padding:10px;border:1px solid var(--border)">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Revenue</div>
-                <div class="mono" style="font-size:13px;font-weight:600" id="d-revenue">—</div>
-              </div>
-              <div style="background:var(--surface2);border-radius:6px;padding:10px;border:1px solid var(--border)">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Net Income</div>
-                <div class="mono" style="font-size:13px;font-weight:600" id="d-netincome">—</div>
-              </div>
-              <div style="background:var(--surface2);border-radius:6px;padding:10px;border:1px solid var(--border)">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Total Assets</div>
-                <div class="mono" style="font-size:13px;font-weight:600" id="d-assets">—</div>
-              </div>
-              <div style="background:var(--surface2);border-radius:6px;padding:10px;border:1px solid var(--border)">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Profit Margin</div>
-                <div class="mono" style="font-size:13px;font-weight:600" id="d-margin">—</div>
-              </div>
-            </div>
-
-            <div class="metric-row">
-              <span class="metric-label">Debt Ratio</span>
-              <span class="metric-value" id="d-debt">—</span>
-            </div>
-
-            <div style="margin-top:12px">
-              <div style="font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em">YoY Revenue Trend</div>
-              <div style="height:100px">
-                <canvas id="chart-revenue"></canvas>
-              </div>
-            </div>
-          </div>
-
-
-          <!-- ── AGENT 2: Market Quant ──────────────────── -->
-          <div class="card">
-            <div class="card-label">Market Quantitative Analyst · Agent 2</div>
-            <p id="d-market-text" style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6"></p>
-
-            <div style="height:130px;margin-bottom:12px">
-              <canvas id="chart-ma"></canvas>
-            </div>
-
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-              <span id="d-cross-label" class="chip">Calculating...</span>
-              <span style="font-size:11px;color:var(--muted)">MA crossover signal</span>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-              <div class="metric-row" style="grid-column:span 2">
-                <span class="metric-label">50-day MA</span>
-                <span class="metric-value mono" id="d-ma50-val">—</span>
-              </div>
-              <div class="metric-row" style="grid-column:span 2">
-                <span class="metric-label">200-day MA</span>
-                <span class="metric-value mono" id="d-ma200-val">—</span>
-              </div>
-            </div>
-
-            <!-- PE Gauge -->
-            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">P/E Ratio Gauge</div>
-            <div style="position:relative;height:90px;display:flex;align-items:center;justify-content:center">
-              <canvas id="chart-pe" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:160px!important;height:90px!important"></canvas>
-              <div style="position:absolute;bottom:2px;text-align:center">
-                <div class="mono" style="font-size:18px;font-weight:600" id="d-pe-value">—</div>
-                <div style="font-size:10px" id="d-pe-label">—</div>
-              </div>
-            </div>
-          </div>
-
-
-          <!-- ── AGENT 3: FinBERT News ───────────────────── -->
-          <div class="card">
-            <div class="card-label">FinBERT News Sentiment · Agent 3</div>
-            <p id="d-news-text" style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6"></p>
-
-            <!-- Sentiment speedometer -->
-            <div style="position:relative;height:100px;display:flex;align-items:center;justify-content:center;margin-bottom:4px">
-              <canvas id="chart-sentiment" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:200px!important;height:100px!important"></canvas>
-              <div style="position:absolute;bottom:0;text-align:center">
-                <div class="mono" style="font-size:22px;font-weight:600" id="d-sentiment-score">0.000</div>
-                <div style="font-size:10px;letter-spacing:0.08em" id="d-sentiment-label">NEUTRAL</div>
-              </div>
-            </div>
-
-            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:14px;padding:0 8px">
-              <span style="color:var(--bear)">-1.0 Bearish</span>
-              <span style="color:var(--bull)">+1.0 Bullish</span>
-            </div>
-
-            <!-- Event detection bars -->
-            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Detected Events (last 7 days)</div>
-            <div id="d-event-bars" class="event-bars"></div>
-          </div>
-
-
-          <!-- ── AGENT 4: Risk Defense ───────────────────── -->
-          <div class="card">
-            <div class="card-label">Capital Defense Risk Officer · Agent 4</div>
-            <p id="d-risk-text" style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6"></p>
-
-            <!-- Radar chart -->
-            <div style="height:180px;margin-bottom:12px">
-              <canvas id="chart-radar"></canvas>
-            </div>
-
-            <!-- 5 risk dimensions -->
-            <div id="d-risk-dims"></div>
-          </div>
-
-        </div><!-- /agent-grid -->
-
-
-        <!-- SYNTHESIS REPORT: full width -->
-        <div class="card synthesis-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-            <div class="card-label" style="margin-bottom:0">Manager Agent · Final Synthesis Report</div>
-            <button class="copy-btn" id="copy-btn">⎘ Copy Report</button>
-          </div>
-
-          <p class="summary-text" id="d-summary-text"></p>
-
-          <div class="synthesis-grid">
-            <!-- Risks -->
-            <div>
-              <div style="font-size:10px;color:var(--bear);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">
-                ▼ Key Risks
-              </div>
-              <div id="d-risks"></div>
-            </div>
-            <!-- Opportunities -->
-            <div>
-              <div style="font-size:10px;color:var(--bull);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">
-                ▲ Opportunities
-              </div>
-              <div id="d-opps"></div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /dashboard-view -->
-
-
-      <!-- ── PORTFOLIO PANEL ─────────────────────────────── -->
-      <div id="portfolio-panel" class="hidden" style="padding:20px">
-
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
-          <div class="card">
-            <div class="card-label">Total Invested</div>
-            <div class="mono" style="font-size:20px;font-weight:600" id="p-total-invested">—</div>
-          </div>
-          <div class="card">
-            <div class="card-label">Current Value</div>
-            <div class="mono" style="font-size:20px;font-weight:600" id="p-current-value">—</div>
-          </div>
-          <div class="card">
-            <div class="card-label">Total P&amp;L</div>
-            <div class="mono" style="font-size:20px;font-weight:600" id="p-total-pnl">—</div>
-          </div>
-        </div>
-
-        <!-- Add holding form -->
-        <div class="card" style="margin-bottom:20px">
-          <div class="card-label">Add Holding</div>
-          <form id="portfolio-form" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
-            <div class="form-group" style="flex:1;min-width:100px">
-              <label>Ticker</label>
-              <input id="p-ticker" type="text" placeholder="AAPL" required style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;text-transform:uppercase">
-            </div>
-            <div class="form-group" style="flex:1;min-width:100px">
-              <label>Quantity</label>
-              <input id="p-qty" type="number" placeholder="10" step="0.01" required style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none">
-            </div>
-            <div class="form-group" style="flex:1;min-width:100px">
-              <label>Buy Price ($)</label>
-              <input id="p-price" type="number" placeholder="150.00" step="0.01" required style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none">
-            </div>
-            <button type="submit" class="btn-primary" style="padding:8px 20px;margin-bottom:0">Add</button>
-          </form>
-        </div>
-
-        <!-- Holdings table -->
-        <div class="card">
-          <div class="card-label">Holdings</div>
-          <div style="overflow-x:auto">
-            <table class="portfolio-table">
-              <thead>
-                <tr>
-                  <th>Ticker</th>
-                  <th>Qty</th>
-                  <th>Buy Price</th>
-                  <th>Current</th>
-                  <th>P&amp;L</th>
-                  <th>P&amp;L %</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="portfolio-tbody">
-                <tr><td colspan="7" class="muted" style="padding:20px;text-align:center">No holdings yet</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div><!-- /portfolio-panel -->
-
-
-      <!-- ── HISTORY PANEL ──────────────────────────────── -->
-      <div id="history-panel" class="hidden" style="padding:20px">
-        <div class="card">
-          <div class="card-label">Analysis History</div>
-          <div id="history-list" style="display:flex;flex-direction:column;gap:2px"></div>
-        </div>
-      </div>
-
-    </main><!-- /main-content -->
-
-  </div><!-- /app-body -->
-</div><!-- /app-shell -->
-
-
-<!-- ── TOAST NOTIFICATION ──────────────────────────────── -->
-<div id="toast">
-  <button class="toast-close" id="toast-close">✕</button>
-  <div class="toast-title" id="toast-title">Error</div>
-  <div class="toast-body" id="toast-body"></div>
-</div>
-
-
-<script src="../static/js/app.js"></script>
+    <script src="../static/js/app.js"></script>
 </body>
 </html>

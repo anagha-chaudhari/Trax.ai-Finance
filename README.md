@@ -13,8 +13,6 @@ Trax.ai is an AI-powered stock research platform designed to simplify investment
 
 ### Overview of the architecture
 
-<img width="1108" height="496" alt="overview drawio" src="https://github.com/user-attachments/assets/f26a25fd-b440-496b-a702-9cbd07e55f29" />
-
 
 #### Future scope
 1. WebSocket-based real-time status updates.

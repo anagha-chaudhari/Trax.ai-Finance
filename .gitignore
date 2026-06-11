@@ -26,5 +26,6 @@ Thumbs.db
 # Docker
 *.log
 
-# HuggingFace model cache (these are large files, better to not commit them)
+# HuggingFace model cache 
 .cache/
+
