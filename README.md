@@ -19,33 +19,36 @@ Trax.ai is an AI-powered stock research platform designed to simplify investment
 
 ---
 
-<h3 align="center">🖥️ User Interface</h3>
+### Agent Architecture & Persona Design
+Every agent is built using three pillars: a Role (defining identity), a Goal (defining their boundary), and a Backstory (establishing their psychological profile and bias).
 
-<table align="center">
-<tr>
-<td align="center">
-<img src="images/secure_login.png" width="450"><br>
-<b>Secure Login</b>
-</td>
+- 1. Senior SEC Filing Analyst (sec_analyst)
+◉ Design Persona: A cynical forensic accountant with a Big Four auditing background. Skeptical by nature, this agent trusts audited, official filings over market hype.
 
-<td align="center">
-<img src="images/traxai1.png" width="450"><br>
-<b>Dashboard</b>
-</td>
-</tr>
+◉ Objective: Extract core raw data from annual 10-K filings to compute operational metrics.
 
-<tr>
-<td align="center">
-<img src="images/traxai2.png" width="450"><br>
-<b>Stock Analysis</b>
-</td>
+◉ Dedicated Tool: fetch_sec_financials (Interacts with the SEC EDGAR system via company CIK numbers).
 
-<td align="center">
-<img src="images/report.png" width="450"><br>
-<b>Generated Report</b>
-</td>
-</tr>
-</table>
+- 2. Quantitative Market Analyst (market_analyst)
+◉ Design Persona: A data-driven hedge fund quantitative researcher who thinks purely in terms of algorithmic technical momentum and relative metrics.
+
+◉ Objective: Establish the macroscopic direction of the stock price and isolate technical crossovers.
+
+◉ Dedicated Tool: fetch_market_data (Wraps yfinance to grab live market feeds and historical distributions).
+
+- 3. Portfolio Risk Evaluator (risk_evaluator)
+◉ Design Persona: An institutional risk officer whose primary directive is capital preservation over raw yield generation.
+
+◉ Objective: Score the asset across 5 distinct dimensions: volatility, leverage, earnings quality, valuation, and liquidity.
+
+◉ Dedicated Tools: Dual access to fetch_market_data and fetch_sec_financials.
+
+- 4. Financial News & Sentiment Analyst (news_analyst)
+◉ Design Persona: A sell-side market research analyst tracking public perception, real-time macro catalysts, and emotional market trends.
+
+◉ Objective: Evaluate immediate momentum and short-term upcoming catalysts.
+
+◉ Dedicated Tool: fetch_news_sentiment (Queries the News API and processes text strings).
 
 
 #### Future scope
