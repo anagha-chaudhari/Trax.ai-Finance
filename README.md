@@ -6,7 +6,7 @@ Trax.ai is an AI-powered stock research platform designed to simplify investment
 ### Key Features
 - 📄 SEC Filing Analysis - Extracts and analyzes company fundamentals directly from SEC EDGAR filings.
 - 📈 Market Intelligence - Evaluates valuation metrics, financial ratios, and technical indicators from live market data.
-- 📰 News & Sentiment Analysis - Uses FinBERT to assess financial news sentiment and identify market-moving events.
+- 📰 News & Sentiment Analysis - Uses NLP to assess financial news sentiment and identify market-moving events.
 - 🤖 Multi-Agent Research Workflow - Specialized AI agents independently analyze fundamentals, risk, sentiment, and market trends before synthesizing a final recommendation.
 - 🎯 Investment Recommendations - Generates structured BUY, HOLD, or SELL recommendations with supporting rationale, risks, and opportunities.
 - 🔒 Portfolio & Report Management - Enables users to save analyses, track portfolios, and access previous research reports through a secure authenticated dashboard.
